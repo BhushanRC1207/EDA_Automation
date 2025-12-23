@@ -1,11 +1,13 @@
 from flask import Flask, render_template, jsonify
 from utils.info import Information
+from utils.analysis import Analysis  # NEW IMPORT
 import os
 
 app = Flask(__name__)
 
-# Use the path defined in your original app.py
-PATH = "./data/crop_yield.csv"
+# PATH = "./data/calories.csv"
+# PATH = "./data/crop_yield.csv"
+PATH = "./data/crop.csv"
 
 @app.route('/')
 def index():
@@ -15,9 +17,17 @@ def index():
 def run_analysis():
     try:
         info = Information(PATH)
-        # Capture the dictionary from our updated info.py
         results = info.get_info() 
-        # return ONLY JSON here
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/run-visualization')  # NEW ROUTE
+def run_visualization():
+    """Generate visualizations for numeric columns"""
+    try:
+        analysis = Analysis(PATH)
+        results = analysis.get_viz()
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -14,13 +14,17 @@
         </header>
         
         <div class="dataset-info">
-            <span class="badge">Dataset: <strong>crop_yield.csv</strong></span>
+            <span class="badge">Dataset: <strong>calories.csv</strong></span>
         </div>
         
         <div class="controls">
             <button id="analyze-btn" class="btn-primary">
                 <span class="btn-icon">🔍</span>
                 Run Analysis
+            </button>
+            <button id="visualize-btn" class="btn-secondary">
+                <span class="btn-icon">📈</span>
+                Generate Visualizations
             </button>
         </div>
 
@@ -45,7 +49,7 @@
 
             <!-- Duplicates Section -->
             <section class="card" id="duplicates-section">
-                <h2>📑 Duplicate Records</h2>
+                <h2>🔒 Duplicate Records</h2>
                 <div id="duplicates-info" class="summary-box"></div>
             </section>
 
@@ -60,6 +64,14 @@
                 <h2>👁️ Sample Data</h2>
                 <div id="sample-note" class="note"></div>
                 <div id="sample-table" class="table-container"></div>
+            </section>
+        </div>
+
+        <!-- Visualization Container -->
+        <div id="viz-container" class="hidden">
+            <section class="card">
+                <h2>📊 Univariate Analysis - Visualizations</h2>
+                <div id="viz-content"></div>
             </section>
         </div>
     </div>

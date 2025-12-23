@@ -1,6 +1,8 @@
+// Analysis button handler
 document.getElementById('analyze-btn').addEventListener('click', function() {
     showLoader();
     hideResults();
+    hideVisualizations();
     
     fetch('/run-analysis')
         .then(response => {
@@ -20,6 +22,30 @@ document.getElementById('analyze-btn').addEventListener('click', function() {
         });
 });
 
+// Visualization button handler
+document.getElementById('visualize-btn').addEventListener('click', function() {
+    showLoader();
+    hideResults();
+    hideVisualizations();
+    
+    fetch('/run-visualization')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoader();
+            displayVisualizations(data);
+        })
+        .catch(error => {
+            hideLoader();
+            console.error('Error:', error);
+            alert('Error generating visualizations: ' + error.message);
+        });
+});
+
 function showLoader() {
     document.getElementById('loader').classList.remove('hidden');
 }
@@ -32,6 +58,10 @@ function hideResults() {
     document.getElementById('results-container').classList.add('hidden');
 }
 
+function hideVisualizations() {
+    document.getElementById('viz-container').classList.add('hidden');
+}
+
 function displayResults(data) {
     document.getElementById('results-container').classList.remove('hidden');
     
@@ -41,6 +71,62 @@ function displayResults(data) {
     displayDuplicates(data.duplicates);
     displayStatistics(data.statistics);
     displaySampleData(data.sample_data);
+}
+
+function displayVisualizations(data) {
+    const vizContainer = document.getElementById('viz-container');
+    const vizContent = document.getElementById('viz-content');
+    
+    vizContainer.classList.remove('hidden');
+    
+    if (data.error) {
+        vizContent.innerHTML = `<div class="alert alert-warning">Error: ${data.error}</div>`;
+        return;
+    }
+    
+    if (!data.visualizations || data.visualizations.length === 0) {
+        vizContent.innerHTML = `<div class="note">No numeric columns found for visualization.</div>`;
+        return;
+    }
+    
+    let html = '';
+    
+    data.visualizations.forEach(viz => {
+        html += `
+            <div class="viz-item">
+                <div class="viz-header">
+                    <h3>📊 ${viz.column}</h3>
+                </div>
+                
+                <div class="viz-stats">
+                    <div class="viz-stat-item">
+                        <div class="viz-stat-label">Mean</div>
+                        <div class="viz-stat-value">${viz.statistics.mean}</div>
+                    </div>
+                    <div class="viz-stat-item">
+                        <div class="viz-stat-label">Median</div>
+                        <div class="viz-stat-value">${viz.statistics.median}</div>
+                    </div>
+                    <div class="viz-stat-item">
+                        <div class="viz-stat-label">Std Dev</div>
+                        <div class="viz-stat-value">${viz.statistics.std}</div>
+                    </div>
+                    <div class="viz-stat-item">
+                        <div class="viz-stat-label">Skewness</div>
+                        <div class="viz-stat-value">${viz.statistics.skewness}</div>
+                    </div>
+                </div>
+                
+                <div class="viz-image-container">
+                    <img src="data:image/png;base64,${viz.image}" 
+                         alt="${viz.column} distribution" 
+                         class="viz-image">
+                </div>
+            </div>
+        `;
+    });
+    
+    vizContent.innerHTML = html;
 }
 
 function displayOverview(overview) {
@@ -200,7 +286,7 @@ function displaySampleData(sampleData) {
     const note = document.getElementById('sample-note');
     const table = document.getElementById('sample-table');
     
-    note.innerHTML = `📝 ${sampleData.note}`;
+    note.innerHTML = `🔍 ${sampleData.note}`;
     
     if (sampleData.rows && sampleData.rows.length > 0) {
         const columns = Object.keys(sampleData.rows[0]);
